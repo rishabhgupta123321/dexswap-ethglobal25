@@ -23,14 +23,10 @@ function Swap() {
   }
 
   function switchTokens() {
-    setPrices(null);
-    setTokenOneAmount(null);
-    setTokenTwoAmount(null);
     const one = tokenOne;
     const two = tokenTwo;
     setTokenOne(two);
     setTokenTwo(one);
-    fetchPrices(two.address, one.address);
   }
 
   const settings = (
