@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import tokenList from "../tokenList.json";
 import axios from "axios";
+import { useSendTransaction, useWaitForTransaction } from "wagmi";
 
 function Swap(props) {
   const { address, isConnected } = props;
@@ -24,6 +25,15 @@ function Swap(props) {
     data: null,
     value: null,
   });
+
+    const {data, sendTransaction} = useSendTransaction({
+    request: {
+      from: address,
+      to: String(txDetails.to),
+      data: String(txDetails.data),
+      value: String(txDetails.value),
+    }
+  })
 
   function handleSlippageChange(e) {
     setSlippage(e.target.value);
@@ -77,6 +87,22 @@ function Swap(props) {
   }
 
 
+  
+async function fetchDexSwap(){
+
+    const allowance = await axios.get(`https://api.1inch.io/v5.0/1/approve/allowance?tokenAddress=${tokenOne.address}&walletAddress=${address}`)
+  
+    if(allowance.data.allowance === "0"){
+
+      const approve = await axios.get(`https://api.1inch.io/v5.0/1/approve/transaction?tokenAddress=${tokenOne.address}`)
+
+      setTxDetails(approve.data);
+      console.log("not approved")
+      return
+
+    }
+
+
 
 
 
@@ -84,7 +110,12 @@ function Swap(props) {
     fetchPrices(tokenList[0].address, tokenList[1].address);
   }, [])
 
+useEffect(()=>{
 
+      if(txDetails.to && isConnected){
+        sendTransaction();
+      }
+  }, [txDetails])
 
   const settings = (
     <>
@@ -177,7 +208,7 @@ function Swap(props) {
             <DownOutlined />
           </div>
         </div>
-        <div className="swapButton" disabled={!tokenOneAmount || !isConnected} onClick={fetchDexSwap}>Swap</div>
+        <div className="swapButton" disabled={!tokenOneAmount || !isConnected}>Swap</div>
       </div>
     </>
   );
