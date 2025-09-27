@@ -36,6 +36,15 @@ function Swap() {
     setIsOpen(true);
   }
 
+  function modifyToken(i) {
+    if (changeToken === 1) {
+      setTokenOne(tokenList[i]);
+    } else {
+      setTokenTwo(tokenList[i]);
+    }
+    setIsOpen(false);
+  }
+
   const settings = (
     <>
       <div>Slippage Tolerance</div>
@@ -62,8 +71,8 @@ function Swap() {
             return (
               <div
                 className="tokenChoice"
-                key={i} /*
-                onClick={() => modifyToken(i)} */
+                key={i}
+                onClick={() => modifyToken(i)}
               >
                 <img src={e.img} alt={e.ticker} className="tokenLogo" />
                 <div className="tokenChoiceNames">
@@ -74,7 +83,6 @@ function Swap() {
             );
           })}
         </div>
-
       </Modal>
       <div className="tradeBox">
         <div className="tradeBoxHeader">
