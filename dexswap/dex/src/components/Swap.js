@@ -22,6 +22,17 @@ function Swap() {
     setTokenOneAmount(e.target.value);
   }
 
+  function switchTokens() {
+    setPrices(null);
+    setTokenOneAmount(null);
+    setTokenTwoAmount(null);
+    const one = tokenOne;
+    const two = tokenTwo;
+    setTokenOne(two);
+    setTokenTwo(one);
+    fetchPrices(two.address, one.address);
+  }
+
   const settings = (
     <>
       <div>Slippage Tolerance</div>
@@ -51,6 +62,11 @@ function Swap() {
       <div className="inputs">
         <Input placeholder="0" value={tokenOneAmount} onChange={changeAmount} />
         <Input placeholder="0" value={tokenTwoAmount} disabled={true} />
+
+        <div className="switchButton" onClick={switchTokens}>
+          <ArrowDownOutlined className="switchArrow" />
+        </div>
+
         <div className="assetOne">
           <img src={tokenOne.img} alt="assetOneLogo" className="assetLogo" />
           {tokenOne.ticker}
