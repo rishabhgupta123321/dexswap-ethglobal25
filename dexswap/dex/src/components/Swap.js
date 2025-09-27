@@ -8,7 +8,9 @@ import {
 import tokenList from "../tokenList.json";
 import axios from "axios";
 
-function Swap() {
+function Swap(props) {
+  const { address, isConnected } = props;
+  const [messageApi, contextHolder] = message.useMessage();
   const [slippage, setSlippage] = useState(2.5);
   const [tokenOneAmount, setTokenOneAmount] = useState(null);
   const [tokenTwoAmount, setTokenTwoAmount] = useState(null);
@@ -17,7 +19,11 @@ function Swap() {
   const [isOpen, setIsOpen] = useState(false);
   const [changeToken, setChangeToken] = useState(1);
   const [prices, setPrices] = useState(null);
-
+  const [txDetails, setTxDetails] = useState({
+    to:null,
+    data: null,
+    value: null,
+  });
 
   function handleSlippageChange(e) {
     setSlippage(e.target.value);
@@ -25,9 +31,9 @@ function Swap() {
 
   function changeAmount(e) {
     setTokenOneAmount(e.target.value);
-    if(e.target.value && prices){
-      setTokenTwoAmount((e.target.value * prices.ratio).toFixed(2))
-    }else{
+    if (e.target.value && prices) {
+      setTokenTwoAmount((e.target.value * prices.ratio).toFixed(2));
+    } else {
       setTokenTwoAmount(null);
     }
   }
@@ -48,30 +54,36 @@ function Swap() {
     setIsOpen(true);
   }
 
-  function modifyToken(i) {
+  function modifyToken(i){
+    setPrices(null);
+    setTokenOneAmount(null);
+    setTokenTwoAmount(null);
     if (changeToken === 1) {
       setTokenOne(tokenList[i]);
+      fetchPrices(tokenList[i].address, tokenTwo.address)
     } else {
       setTokenTwo(tokenList[i]);
+      fetchPrices(tokenOne.address, tokenList[i].address)
     }
     setIsOpen(false);
   }
 
-async function fetchPrices(one, two){
+  async function fetchPrices(one, two) {
+    const res = await axios.get(`http://localhost:3001/tokenPrice`, {
+      params: { addressOne: one, addressTwo: two }
+    });
 
-      const res = await axios.get(`http://localhost:3001/tokenPrice`, {
-        params: {addressOne: one, addressTwo: two}
-      })
-
-      console.log(res.data);
-      setPrices(res.data)
+    setPrices(res.data);
   }
 
-  useEffect(()=>{
 
-    fetchPrices(tokenList[0].address, tokenList[1].address)
 
+
+
+  useEffect(() => {
+    fetchPrices(tokenList[0].address, tokenList[1].address);
   }, [])
+
 
 
   const settings = (
@@ -87,8 +99,11 @@ async function fetchPrices(one, two){
     </>
   );
 
+
+
   return (
     <>
+      {contextHolder}
       <Modal
         open={isOpen}
         footer={null}
@@ -100,8 +115,8 @@ async function fetchPrices(one, two){
             return (
               <div
                 className="tokenChoice"
-                key={i}
-                onClick={() => modifyToken(i)}
+                key={i}/*
+                onClick={() => modifyToken(i)} */
               >
                 <img src={e.img} alt={e.ticker} className="tokenLogo" />
                 <div className="tokenChoiceNames">
@@ -112,6 +127,8 @@ async function fetchPrices(one, two){
             );
           })}
         </div>
+
+
       </Modal>
       <div className="tradeBox">
         <div className="tradeBoxHeader">
@@ -130,12 +147,24 @@ async function fetchPrices(one, two){
             placeholder="0"
             value={tokenOneAmount}
             onChange={changeAmount}
+            disabled={!prices}
           />
           <Input placeholder="0" value={tokenTwoAmount} disabled={true} />
-
           <div className="switchButton" onClick={switchTokens}>
             <ArrowDownOutlined className="switchArrow" />
           </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
           <div className="assetOne" onClick={() => openModal(1)}>
             <img src={tokenOne.img} alt="assetOneLogo" className="assetLogo" />
@@ -148,9 +177,7 @@ async function fetchPrices(one, two){
             <DownOutlined />
           </div>
         </div>
-        <div className="swapButton" disabled={!tokenOneAmount}>
-          Swap
-        </div>
+        <div className="swapButton" disabled={!tokenOneAmount || !isConnected} onClick={fetchDexSwap}>Swap</div>
       </div>
     </>
   );
