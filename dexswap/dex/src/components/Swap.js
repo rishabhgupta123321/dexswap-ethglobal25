@@ -7,15 +7,19 @@ import {
 } from "@ant-design/icons";
 
 function Swap() {
+  const [slippage, setSlippage] = useState(2.5);
+  const [tokenOneAmount, setTokenOneAmount] = useState(null);
+  const [tokenTwoAmount, setTokenTwoAmount] = useState(null);
 
-const [slippage, setSlippage] = useState(2.5);
-
-function handleSlippageChange(e) {
+  function handleSlippageChange(e) {
     setSlippage(e.target.value);
   }
 
+  function changeAmount(e) {
+    setTokenOneAmount(e.target.value);
+  }
 
-const settings = (
+  const settings = (
     <>
       <div>Slippage Tolerance</div>
       <div>
@@ -29,20 +33,24 @@ const settings = (
   );
 
   return (
-  <div className="tradeBox">
-    <div className="tradeBoxHeader">
-      <h4>Swap</h4>
-      <Popover
-            content={settings}
-            title="Settings"
-            trigger="click"
-            placement="bottomRight"
-          >
-            <SettingOutlined className="cog" />
-          </Popover>
-  </div>
-  </div>
-  )
+    <div className="tradeBox">
+      <div className="tradeBoxHeader">
+        <h4>Swap</h4>
+        <Popover
+          content={settings}
+          title="Settings"
+          trigger="click"
+          placement="bottomRight"
+        >
+          <SettingOutlined className="cog" />
+        </Popover>
+      </div>
+      <div className="inputs">
+        <Input placeholder="0" value={tokenOneAmount} onChange={changeAmount} />
+        <Input placeholder="0" value={tokenTwoAmount} disabled={true} />
+      </div>
+    </div>
+  );
 }
 
 export default Swap;
